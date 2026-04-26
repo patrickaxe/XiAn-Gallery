@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!--Change here-->
+    <title>Memories in Xi'an 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600&family=La+Belle+Aurore&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background-color: #f8f3f0;
+            font-family: 'Crimson Text', serif;
+            color: #4a0f1d;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(#e5d1cb 1px, transparent 1px),
+                radial-gradient(#e5d1cb 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+        }
+
+        /* Define animations */
+        @keyframes heartbeat {
+            0% { transform: scale(1) rotate(45deg); }
+            15% { transform: scale(1.1) rotate(45deg); }
+            30% { transform: scale(1) rotate(45deg); }
+            45% { transform: scale(1.1) rotate(45deg); }
+            60% { transform: scale(1) rotate(45deg); }
+            100% { transform: scale(1) rotate(45deg); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes floatIn {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* New smoother animation for gallery items */
+        @keyframes fadeInScale {
+            0% { opacity: 0; transform: translateY(25px) scale(0.95); }
+            60% { opacity: 0.8; }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 4px 20px rgba(74, 15, 29, 0.1); }
+            50% { box-shadow: 0 8px 25px rgba(74, 15, 29, 0.2); }
+            100% { box-shadow: 0 4px 20px rgba(74, 15, 29, 0.1); }
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #f8f3f0;
+            z-index: 1000;
+            transition: opacity 0.8s ease-out;
+            background-image: 
+                radial-gradient(#e5d1cb 1px, transparent 1px),
+                radial-gradient(#e5d1cb 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+        }
+
+        .card {
+            position: relative;
+            width: 90vw;
+            max-width: 400px;
+            height: 90vw;
+            max-height: 400px;
+            background-color: transparent;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        .blur-shape {
+            position: absolute;
+            width: 30%;
+            height: 30%;
+            background-color: #4a0f1d;
+            transform: rotate(45deg);
+            filter: blur(10px);
+            opacity: 0.95;
+            top: 15%;
+            animation: heartbeat 2s infinite ease-in-out;
+        }
+        
+        .blur-shape::before,
+        .blur-shape::after {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: #4a0f1d;
+            border-radius: 50%;
+            filter: blur(10px);
+        }
+        
+        .blur-shape::before {
+            top: -50%;
+            left: 0;
+        }
+        
+        .blur-shape::after {
+            top: 0;
+            left: -50%;
+        }
+
+        /* Create a cleaner heart shape with less blur */
+        .blur-shape, .blur-shape::before, .blur-shape::after {
+            box-shadow: 0 0 10px 3px rgba(74, 15, 29, 0.5);
+        }
+        
+        .text {
+            position: absolute;
+            bottom: 8%;
+            color: #4a0f1d;
+            font-size: clamp(1rem, 5vw, 1.5rem);
+            text-align: center;
+            opacity: 0.9;
+            letter-spacing: 0.5px;
+            z-index: 20;
+            width: 90%;
+            line-height: 1.4;
+            font-family: 'La Belle Aurore', cursive;
+        }
+
+        /* Main Content */
+        .main-content {
+            opacity: 0;
+            display: none;
+            width: 100%;
+            min-height: 100vh;
+            padding: 2rem;
+            box-sizing: border-box;
+            transition: opacity 0.8s ease-in;
+        }
+
+        .title {
+            text-align: center;
+            margin: 2rem 0 3rem;
+            font-size: clamp(1.8rem, 5vw, 3rem);
+            color: #4a0f1d;
+            letter-spacing: 1px;
+            font-weight: 600;
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        /* Pinterest-like gallery */
+        .gallery {
+            display: flex;
+            column-count: initial;
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .gallery-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .gallery-item {
+            break-inside: avoid;
+            margin-bottom: 0;
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(74, 15, 29, 0.1);
+            transition: all 0.5s ease;
+            background-color: #f8f3f0;
+            animation: fadeInScale 0.8s ease-out forwards;
+            opacity: 0;
+            transform: translateY(25px) scale(0.95);
+            animation-play-state: paused;
+            width: 100%;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-8px) scale(1.01);
+            box-shadow: 0 8px 25px rgba(74, 15, 29, 0.2);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .gallery-item::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 70%, rgba(74, 15, 29, 0.1));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 10px;
+        }
+        
+        .gallery-item:hover::after {
+            opacity: 1;
+        }
+        
+        /* Loading indicator for infinite scroll - Shadcn UI inspired */
+        .loading-more {
+            width: 100%;
+            max-width: 1200px;
+            margin: 2rem auto 3rem;
+            display: none;
+        }
+
+        .scroll-skeleton-container {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            position: relative;
+            padding: 10px;
+        }
+
+        /* Shadcn-inspired skeletal item */
+        .scroll-skeleton-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            background-color: #f2f2f2;
+            box-shadow: none;
+        }
+        
+        /* Varied heights for more natural appearance */
+        .scroll-skeleton-item:nth-child(1) {
+            height: 230px;
+        }
+        
+        .scroll-skeleton-item:nth-child(2) {
+            height: 190px;
+        }
+        
+        .scroll-skeleton-item:nth-child(3) {
+            height: 250px;
+        }
+        
+        /* Remove shimmer effect */
+        .scroll-skeleton-item::before {
+            content: none;
+        }
+        
+        /* Remove gradient overlay */
+        .scroll-skeleton-item::after {
+            content: none;
+        }
+        
+        /* Remove faux elements */
+        .scroll-skeleton-item span {
+            display: none;
+        }
+        
+        /* Media queries for responsive design */
+        @media (max-width: 900px) {
+            .gallery {
+                display: flex;
+            }
+            
+            #column3 {
+                display: none;
+            }
+            
+            .gallery-column {
+                flex: 1;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .gallery {
+                display: flex;
+            }
+            
+            #column2, #column3 {
+                display: none;
+            }
+            
+            .gallery-column {
+                flex: 1;
+            }
+            
+            /* Smaller skeleton items for mobile */
+            .scroll-skeleton-item:nth-child(1),
+            .scroll-skeleton-item:nth-child(2) {
+                height: 160px;
+            }
+            
+            .scroll-skeleton-item:nth-child(3) {
+                display: none; /* Hide the third skeleton item on mobile */
+            }
+            
+            /* Adjust the faux text lines */
+            .scroll-skeleton-item span:nth-child(2) {
+                bottom: 20px;
+                height: 6px;
+                width: 45%;
+            }
+            
+            .scroll-skeleton-item span:nth-child(3) {
+                bottom: 8px;
+                height: 5px;
+                width: 65%;
+            }
+            
+            /* Make loading indicator smaller */
+            .loading-more {
+                margin: 1.5rem auto 2rem;
+            }
+        }
+        
+        /* Custom scroll-skeleton entry animation */
+        @keyframes fadeInUpSoft {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .scroll-skeleton-container {
+            animation: fadeInUpSoft 0.4s ease-out forwards;
+        }
+
+        /* No images message styling */
+        #no-images-message {
+            text-align: center;
+            margin: 40px 0;
+            padding: 30px;
+            color: #4a0f1d;
+            border: 1px dashed rgba(74, 15, 29, 0.3);
+            border-radius: 10px;
+            background-color: rgba(74, 15, 29, 0.05);
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        /* Media queries for different screen sizes */
+        @media (max-width: 400px) {
+            .card {
+                height: 85vh;
+            }
+            
+            .blur-shape {
+                top: 20%;
+            }
+            
+            .text {
+                bottom: 12%;
+            }
+        }
+
+        /* Skeleton loader for initial gallery */
+        .gallery-skeleton-item {
+            position: relative;
+            width: 100%;
+            border-radius: 10px;
+            background-color: #f2f2f2;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: none;
+        }
+        
+        /* Varied heights for skeleton items to look more natural */
+        .gallery-skeleton-item:nth-child(3n+1) {
+            height: 230px;
+        }
+        
+        .gallery-skeleton-item:nth-child(3n+2) {
+            height: 270px;
+        }
+        
+        .gallery-skeleton-item:nth-child(3n+3) {
+            height: 200px;
+        }
+        
+        /* Remove shimmer animation */
+        .gallery-skeleton-item::before {
+            content: none;
+        }
+
+        /* Media queries for responsive design */
+        @media (max-width: 900px) {
+            .gallery {
+                display: flex;
+            }
+            
+            #column3 {
+                display: none;
+            }
+            
+            .gallery-column {
+                flex: 1;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .gallery {
+                display: flex;
+                gap: 15px; /* Smaller gap for mobile */
+            }
+            
+            #column3 {
+                display: none; /* Only hide column 3 on mobile */
+            }
+            
+            #column1, #column2 {
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .gallery-column {
+                flex: 1;
+            }
+            
+            /* Adjust skeleton items for mobile - now show 2 columns */
+            .scroll-skeleton-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .scroll-skeleton-item:nth-child(1),
+            .scroll-skeleton-item:nth-child(2) {
+                height: 160px;
+            }
+            
+            .scroll-skeleton-item:nth-child(3) {
+                display: none; /* Hide the third skeleton item on mobile */
+            }
+            
+            /* Adjust the gallery skeleton items for 2 columns */
+            .gallery-skeleton-item {
+                height: 180px !important; /* Override the varied heights for mobile */
+            }
+            
+            /* Make loading indicator smaller */
+            .loading-more {
+                margin: 1.5rem auto 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen">
+        <div class="card">
+            <div class="blur-shape"></div>
+            <div class="text">
+                        <!--Change here-->
+                Enjoy the trip in Xi'an!
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+                    <!--Change here-->
+        <h1 class="title">Memories in Xi'an</h1>
+        <div class="gallery" id="gallery">
+            <!-- Replace column structure with skeleton loaders -->
+            <div class="gallery-column" id="column1">
+                <!-- Skeleton loaders for column 1 -->
+                <div class="gallery-skeleton-item" data-column="1"></div>
+                <div class="gallery-skeleton-item" data-column="1"></div>
+                <div class="gallery-skeleton-item" data-column="1"></div>
+                <div class="gallery-skeleton-item" data-column="1"></div>
+                <div class="gallery-skeleton-item" data-column="1"></div>
+                <div class="gallery-skeleton-item" data-column="1"></div>
+                <div class="gallery-skeleton-item" data-column="1"></div>
+                <div class="gallery-skeleton-item" data-column="1"></div>
+                <div class="gallery-skeleton-item" data-column="1"></div>
+                <div class="gallery-skeleton-item" data-column="1"></div>
+            </div>
+            <div class="gallery-column" id="column2">
+                <!-- Skeleton loaders for column 2 -->
+                <div class="gallery-skeleton-item" data-column="2"></div>
+                <div class="gallery-skeleton-item" data-column="2"></div>
+                <div class="gallery-skeleton-item" data-column="2"></div>
+                <div class="gallery-skeleton-item" data-column="2"></div>
+                <div class="gallery-skeleton-item" data-column="2"></div>
+                <div class="gallery-skeleton-item" data-column="2"></div>
+                <div class="gallery-skeleton-item" data-column="2"></div>
+                <div class="gallery-skeleton-item" data-column="2"></div>
+                <div class="gallery-skeleton-item" data-column="2"></div>
+                <div class="gallery-skeleton-item" data-column="2"></div>
+            </div>
+            <div class="gallery-column" id="column3">
+                <!-- Skeleton loaders for column 3 -->
+                <div class="gallery-skeleton-item" data-column="3"></div>
+                <div class="gallery-skeleton-item" data-column="3"></div>
+                <div class="gallery-skeleton-item" data-column="3"></div>
+                <div class="gallery-skeleton-item" data-column="3"></div>
+                <div class="gallery-skeleton-item" data-column="3"></div>
+                <div class="gallery-skeleton-item" data-column="3"></div>
+                <div class="gallery-skeleton-item" data-column="3"></div>
+                <div class="gallery-skeleton-item" data-column="3"></div>
+                <div class="gallery-skeleton-item" data-column="3"></div>
+                <div class="gallery-skeleton-item" data-column="3"></div>
+            </div>
+        </div>
+        
+        <!-- Loading indicator for infinite scroll -->
+        <div class="loading-more" id="loading-more">
+            <div class="scroll-skeleton-container">
+                <div class="scroll-skeleton-item">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <div class="scroll-skeleton-item">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <div class="scroll-skeleton-item">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show loading screen for at least 3 seconds
+            setTimeout(function() {
+                const loadingScreen = document.querySelector('.loading-screen');
+                const mainContent = document.querySelector('.main-content');
+                
+                // Hide loading screen
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                    
+                    // Show main content
+                    mainContent.style.display = 'block';
+                    setTimeout(() => {
+                        mainContent.style.opacity = '1';
+                    }, 50);
+                    
+                    // Load images from ./image directory
+                    loadImagesFromDirectory();
+                }, 800);
+            }, 3000);
+            
+            // Function to load images from ./image directory
+            function loadImagesFromDirectory() {
+                const gallery = document.getElementById('gallery');
+                const loadingMoreIndicator = document.getElementById('loading-more');
+                const imageDir = './image/'; 
+                
+                // Common image extensions
+                const extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                
+                // Track loaded images and attempts
+                let imagesLoaded = 0;
+                let totalAttempts = 0;
+                const maxAttempts = 150; // Reasonable limit
+                let loadedImagePaths = []; // Store successfully loaded image paths
+                let allImagesDisplayed = false; // Flag to track if all images have been shown once
+                let imagesDiscoveryComplete = false; // Flag to track if all image discovery attempts are finished
+                
+                // Track currently visible images to avoid duplicates
+                let visibleImages = new Set();
+                let batchCounter = 0; // Count how many batches we've added
+                
+                // Manage the number of rows to display at once
+                const rowsPerBatch = 7;
+                const imagesPerRow = 3;
+                const maxImagesPerBatch = rowsPerBatch * imagesPerRow;
+                let skeletonItems = document.querySelectorAll('.gallery-skeleton-item');
+                let remainingImagePaths = []; // Store images that didn't fit in first batch
+                
+                // Try to load numbered webp files sequentially
+                let currentImage = 1;
+                
+                // Start the sequential loading process
+                tryNextImage();
+                
+                // Function to try loading the next image
+                function tryNextImage() {
+                    // Check if we've tried enough images
+                    if (currentImage > 50) {
+                        finishImageDiscovery();
+                        return;
+                    }
+                    
+                    // Generate the image path (numbered webp)
+                    const imagePath = `${imageDir}${currentImage}.webp`;
+                    currentImage++;
+                    
+                    // Try to load the image
+                    const img = new Image();
+                    totalAttempts++;
+                    
+                    img.onload = function() {
+                        // Image loaded successfully
+                        loadedImagePaths.push(imagePath);
+                        
+                        // If we have enough images for the first batch, store the rest for later
+                        if (loadedImagePaths.length <= maxImagesPerBatch) {
+                            // Add to gallery (replacing skeleton)
+                            addImageToGallery(imagePath, loadedImagePaths.length);
+                        } else {
+                            // Store for later loading when user scrolls down
+                            remainingImagePaths.push(imagePath);
+                        }
+                        
+                        // Continue with next image after a small delay
+                        setTimeout(tryNextImage, 80);
+                    };
+                    
+                    img.onerror = function() {
+                        // If we get 3 consecutive errors, assume we've reached the end of the images
+                        if (currentImage > 3 && loadedImagePaths.length > 0) {
+                            finishImageDiscovery();
+                            return;
+                        }
+                        
+                        // Continue with next image with a small delay
+                        setTimeout(tryNextImage, 30);
+                    };
+                    
+                    img.src = imagePath;
+                }
+                
+                // Function to finish the discovery process
+                function finishImageDiscovery() {
+                    console.log(`Image discovery completed. Found ${loadedImagePaths.length + remainingImagePaths.length} images total.`);
+                    console.log(`Loaded ${loadedImagePaths.length} images in first batch, ${remainingImagePaths.length} remaining.`);
+                    
+                    imagesDiscoveryComplete = true;
+                    
+                    // If no images found, show message
+                    if (loadedImagePaths.length === 0 && remainingImagePaths.length === 0) {
+                        showNoImagesMessage();
+                        return;
+                    }
+                    
+                    // Remove any remaining skeleton loaders
+                    skeletonItems.forEach(item => {
+                        if (item.parentNode) {
+                            item.parentNode.removeChild(item);
+                        }
+                    });
+                    
+                    // Pre-load the remaining images
+                    remainingImagePaths.forEach(path => {
+                        const preloadImg = new Image();
+                        preloadImg.src = path;
+                    });
+                }
+                
+                // Function to add an image to the gallery (replacing skeleton loader)
+                function addImageToGallery(src, imageIndex) {
+                    imagesLoaded++;
+                    
+                    const item = document.createElement('div');
+                    item.className = 'gallery-item';
+                    item.dataset.imagePath = src; // Store the image path for tracking
+                    
+                    // Animation delay based on load order
+                    const delay = Math.min(0.05 * imagesLoaded, 1.5);
+                    item.style.animationDelay = delay + 's';
+                    item.style.animationPlayState = 'running';
+                    
+                    const displayImg = document.createElement('img');
+                    displayImg.src = src;
+                    displayImg.alt = 'Memory';
+                    displayImg.loading = 'lazy';
+                    
+                    item.appendChild(displayImg);
+                    
+                    // Add to visibleImages set to track uniqueness
+                    visibleImages.add(src);
+                    
+                    // Check how many columns we should have based on screen width
+                    const isMobile = window.innerWidth <= 600;
+                    const numColumns = isMobile ? 2 : (window.innerWidth <= 900 ? 2 : 3);
+                    
+                    // Row-wise distribution (place images in order across columns)
+                    // imageIndex is 1-based, so we subtract 1 to make it 0-based
+                    const rowIndex = Math.floor((imageIndex - 1) / numColumns);
+                    const columnIndex = (imageIndex - 1) % numColumns;
+                    
+                    // Skip column 3 on mobile and tablet
+                    if ((isMobile || window.innerWidth <= 900) && columnIndex >= numColumns) {
+                        return; // Skip this image for now, it will be in remainingImagePaths
+                    }
+                    
+                    const column = document.getElementById(`column${columnIndex + 1}`);
+                    
+                    // Find and replace a skeleton loader if available
+                    const skeletonToReplace = column.querySelector('.gallery-skeleton-item');
+                    if (skeletonToReplace) {
+                        column.replaceChild(item, skeletonToReplace);
+                    } else {
+                        column.appendChild(item);
+                    }
+                    
+                    // Remove no-images message if it exists
+                    const noImagesMsg = document.getElementById('no-images-message');
+                    if (noImagesMsg) {
+                        noImagesMsg.remove();
+                    }
+                }
+                
+                // Set up infinite scroll functionality
+                window.addEventListener('scroll', function() {
+                    // Check if we're near the bottom of the page
+                    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
+                        // Only proceed if we've completed image discovery
+                        if (imagesDiscoveryComplete) {
+                            // If we have remaining images to show, show them first
+                            if (remainingImagePaths.length > 0) {
+                                // Show loading indicator
+                                loadingMoreIndicator.style.display = 'block';
+                                
+                                // Wait a bit for effect, then load more from remaining images
+                                setTimeout(() => {
+                                    loadRemainingImages();
+                                    loadingMoreIndicator.style.display = 'none';
+                                }, 1200);
+                            } 
+                            // Otherwise, if we've shown all initial images, repeat them
+                            else if (allImagesDisplayed) {
+                                // Show loading indicator
+                                loadingMoreIndicator.style.display = 'block';
+                                
+                                // Wait a bit for effect, then load more images
+                                setTimeout(() => {
+                                    loadMoreImages();
+                                    loadingMoreIndicator.style.display = 'none';
+                                }, 1200);
+                            } else if (!allImagesDisplayed) {
+                                // If this is the first time reaching the bottom of the page,
+                                // mark that all images have been displayed
+                                console.log("User has reached the end of all initial images. Now enabling repeats.");
+                                allImagesDisplayed = true;
+                            }
+                        }
+                    }
+                });
+                
+                // Function to load remaining discovered images
+                function loadRemainingImages() {
+                    const batchSize = Math.min(remainingImagePaths.length, maxImagesPerBatch);
+                    console.log(`Loading ${batchSize} more images from remaining discovered images`);
+                    
+                    // Take a batch of remaining images
+                    const imagesToLoad = remainingImagePaths.splice(0, batchSize);
+                    
+                    // Update visible images list (remove images that have scrolled out of view)
+                    updateVisibleImages();
+                    
+                    // Check how many columns are currently visible (for responsive layout)
+                    const isMobile = window.innerWidth <= 600;
+                    const numColumns = isMobile ? 2 : (window.innerWidth <= 900 ? 2 : 3);
+                    
+                    // Load them row by row
+                    const numRows = Math.ceil(imagesToLoad.length / numColumns);
+                    
+                    for (let row = 0; row < numRows; row++) {
+                        for (let col = 0; col < numColumns; col++) {
+                            const imageIndex = row * numColumns + col;
+                            if (imageIndex < imagesToLoad.length) {
+                                const imgSrc = imagesToLoad[imageIndex];
+                                const delay = row * 100 + col * 50;
+                                
+                                // Skip column 3 on mobile and tablet
+                                if ((isMobile || window.innerWidth <= 900) && col >= numColumns) {
+                                    continue;
+                                }
+                                
+                                setTimeout(() => {
+                                    const item = document.createElement('div');
+                                    item.className = 'gallery-item';
+                                    item.dataset.imagePath = imgSrc; // Store the image path
+                                    
+                                    const animDelay = 0.1 * col;
+                                    item.style.animationDelay = animDelay + 's';
+                                    item.style.animationPlayState = 'running';
+                                    
+                                    const displayImg = document.createElement('img');
+                                    displayImg.src = imgSrc;
+                                    displayImg.alt = 'Memory';
+                                    displayImg.loading = 'lazy';
+                                    
+                                    item.appendChild(displayImg);
+                                    
+                                    // Add to correct column based on row-wise distribution
+                                    const column = document.getElementById(`column${col + 1}`);
+                                    column.appendChild(item);
+                                    
+                                    // Track this image as visible
+                                    visibleImages.add(imgSrc);
+                                }, delay);
+                            }
+                        }
+                    }
+                }
+                
+                // Function to update the list of currently visible images
+                function updateVisibleImages() {
+                    visibleImages.clear();
+                    
+                    // Get all gallery items that are currently in the visible viewport
+                    const galleryItems = document.querySelectorAll('.gallery-item');
+                    
+                    galleryItems.forEach(item => {
+                        const rect = item.getBoundingClientRect();
+                        // Check if the item is visible in the viewport
+                        if (rect.top >= -rect.height && rect.top <= window.innerHeight) {
+                            visibleImages.add(item.dataset.imagePath);
+                        }
+                    });
+                    
+                    console.log(`Currently tracking ${visibleImages.size} visible images`);
+                }
+                
+                // Function to load repeating images for infinite scroll
+                function loadMoreImages() {
+                    if (loadedImagePaths.length === 0) return;
+                    
+                    batchCounter++;
+                    console.log(`Adding batch #${batchCounter} of repeating images`);
+                    
+                    // Create a copy of all loaded images
+                    const allImages = [...loadedImagePaths, ...remainingImagePaths];
+                    
+                    // Update the set of currently visible images
+                    updateVisibleImages();
+                    
+                    // Filter out images that are currently visible to avoid duplicates
+                    let availableImages = allImages.filter(img => !visibleImages.has(img));
+                    
+                    // If we don't have enough unique images, use all images but ensure
+                    // each 7-row batch has unique images
+                    if (availableImages.length < maxImagesPerBatch) {
+                        availableImages = [...allImages];
+                        // Shuffle to avoid predictable repeats
+                        shuffleArray(availableImages);
+                    } else {
+                        // Shuffle the available images for variety
+                        shuffleArray(availableImages);
+                    }
+                    
+                    // Check how many columns are currently visible (for responsive layout)
+                    const isMobile = window.innerWidth <= 600;
+                    const numColumns = isMobile ? 2 : (window.innerWidth <= 900 ? 2 : 3);
+                    
+                    // Ensure we have enough images for this batch
+                    const batchSize = Math.min(availableImages.length, rowsPerBatch * numColumns);
+                    const imagesToLoad = availableImages.slice(0, batchSize);
+                    
+                    // Load them row by row
+                    const numRows = Math.ceil(imagesToLoad.length / numColumns);
+                    
+                    for (let row = 0; row < numRows; row++) {
+                        for (let col = 0; col < numColumns; col++) {
+                            const imageIndex = row * numColumns + col;
+                            if (imageIndex < imagesToLoad.length) {
+                                const imgSrc = imagesToLoad[imageIndex];
+                                const delay = row * 100 + col * 50;
+                                
+                                // Skip column 3 on mobile and tablet
+                                if ((isMobile || window.innerWidth <= 900) && col >= numColumns) {
+                                    continue;
+                                }
+                                
+                                setTimeout(() => {
+                                    const item = document.createElement('div');
+                                    item.className = 'gallery-item';
+                                    item.dataset.imagePath = imgSrc; // Store the image path
+                                    
+                                    const animDelay = 0.1 * col;
+                                    item.style.animationDelay = animDelay + 's';
+                                    item.style.animationPlayState = 'running';
+                                    
+                                    const displayImg = document.createElement('img');
+                                    displayImg.src = imgSrc;
+                                    displayImg.alt = 'Memory';
+                                    displayImg.loading = 'lazy';
+                                    
+                                    item.appendChild(displayImg);
+                                    
+                                    // Add to correct column based on row-wise distribution
+                                    const column = document.getElementById(`column${col + 1}`);
+                                    column.appendChild(item);
+                                    
+                                    // Track this image as visible
+                                    visibleImages.add(imgSrc);
+                                }, delay);
+                            }
+                        }
+                    }
+                }
+                
+                // Fisher-Yates shuffle algorithm
+                function shuffleArray(array) {
+                    for (let i = array.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [array[i], array[j]] = [array[j], array[i]];
+                    }
+                    return array;
+                }
+                
+                // Function to show no images message
+                function showNoImagesMessage() {
+                    const noImagesMsg = document.getElementById('no-images-message');
+                    if (!noImagesMsg) {
+                        const message = document.createElement('div');
+                        message.id = 'no-images-message';
+                        message.innerHTML = `
+                            <p>No images found in the ./image folder.</p>
+                            <p>Please add images to the ./image folder and refresh the page.</p>
+                        `;
+                        gallery.appendChild(message);
+                    }
+                }
+                
+                // Add resize event listener for responsive layout adjustments
+                let resizeTimer;
+                window.addEventListener('resize', function() {
+                    clearTimeout(resizeTimer);
+                    resizeTimer = setTimeout(function() {
+                        // Only need to handle this if we've completed discovery
+                        if (imagesDiscoveryComplete) {
+                            // Check if width has crossed our breakpoints
+                            const isMobile = window.innerWidth <= 600;
+                            const isTablet = window.innerWidth <= 900 && window.innerWidth > 600;
+                            
+                            // Show/hide columns based on screen size
+                            const column1 = document.getElementById('column1');
+                            const column2 = document.getElementById('column2');
+                            const column3 = document.getElementById('column3');
+                            
+                            if (isMobile) {
+                                // Show only columns 1 and 2
+                                if (column1) column1.style.display = 'flex';
+                                if (column2) column2.style.display = 'flex';
+                                if (column3) column3.style.display = 'none';
+                            } else if (isTablet) {
+                                // Show only columns 1 and 2
+                                if (column1) column1.style.display = 'flex';
+                                if (column2) column2.style.display = 'flex';
+                                if (column3) column3.style.display = 'none';
+                            } else {
+                                // Show all columns
+                                if (column1) column1.style.display = 'flex';
+                                if (column2) column2.style.display = 'flex';
+                                if (column3) column3.style.display = 'flex';
+                            }
+                            
+                            // Update visible images to reflect new layout
+                            updateVisibleImages();
+                        }
+                    }, 250); // Debounce resize event
+                });
+            }
+        });
+    </script>
+</body>
+</html>
